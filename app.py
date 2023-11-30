@@ -1,9 +1,11 @@
-import requests
 from flask import Flask, request, jsonify
 from flask_cors import CORS
 from models import Product
 from dotenv import load_dotenv
 import os
+import asyncio
+import aiohttp
+
 
 app = Flask(__name__)
 CORS(app)
@@ -20,7 +22,7 @@ class Config:
 
 
 config = Config()
-app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://localhost:5432/postgres'
+app.config['SQLALCHEMY_DATABASE_URI'] = 'jdbc:postgresql://localhost:5432/postgres'
 
 
 books = [
@@ -178,44 +180,48 @@ def update_book(book_id):
     }), 404
 
 
+async def fetch_products(session):
+    url = 'https://dummyjson.com/products'
+
+    async with session.get(url) as response:
+        if response.status == 200:
+            data = await response.json()
+            return data['data']['products'][:10]
+
+
+async def get_all_products():
+    async with aiohttp.ClientSession() as session:
+        products = await fetch_products(session)
+        return products
+
+
 @app.route('/im/v1/products', methods=['GET'])
-def get_products():
-    limit = request.args.get('limit', default=10, type=int)
-    skip = request.args.get('skip', default=0, type=int)
+async def get_products():
+    products = await get_all_products()
 
-    url = f'https://dummyjson.com/products?limit={limit}&skip={skip}'
-    response = requests.get(url)
+    simplified_products = []
+    for product in products:
+        simplified_product = {
+            'id': product['id'],
+            'name': product['name'],
+            'description': product['description'],
+            'stock': product['stock'],
+            'brand': product['brand'],
+            'category': product['category'],
+            'thumbnail': product['thumbnail']
+        }
+        simplified_products.append(simplified_product)
 
-    if response.status_code == 200:
-        data = response.json()
-        products = data['data']['products']
-
-        simplified_products = []
-        for product in products:
-            simplified_product = {
-                'id': product['id'],
-                'name': product['name'],
-                'description': product['description'],
-                'stock': product['stock'],
-                'brand': product['brand'],
-                'category': product['category'],
-                'thumbnail': product['thumbnail']
-            }
-            simplified_products.append(simplified_product)
-
-        return jsonify({
-            'data': {
-                'products': simplified_products
-            },
-            'status': 'success'
-        })
-    else:
-        return jsonify({
-            'status': 'error',
-            'message': 'Failed to retrieve products'
-        }), 500
+    return jsonify({
+        'data': {
+            'products': simplified_products
+        },
+        'status': 'success'
+    })
 
 
 if __name__ == '__main__':
+    loop = asyncio.get_event_loop()
+    loop.run_until_complete(asyncio.ensure_future(fetch_products()))
     app.run(host=config.host, port=config.port, debug=config.debug)
 #   app.run(host='api.cloud-services.flask', port=5010)

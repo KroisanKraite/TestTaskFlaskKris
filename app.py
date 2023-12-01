@@ -10,6 +10,11 @@ import aiohttp
 
 app = Flask(__name__)
 CORS(app)
+app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://postgres:postgres@localhost/TestTaskDB'
+db = SQLAlchemy(app)
+db_host = os.getenv('DB_HOST')
+db_user = os.environ.get('DB_USER')
+db_password = os.getenv('DB_PASSWORD')
 
 
 class Config:
@@ -23,8 +28,6 @@ class Config:
 
 
 config = Config()
-app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://postgres:postgres@localhost/TestTaskDB'
-db = SQLAlchemy(app)
 
 
 books = [

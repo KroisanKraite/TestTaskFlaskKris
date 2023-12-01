@@ -82,18 +82,18 @@ def get_books():
     })
 
 
-@app.route('/products', methods=['GET'])
-def get_products():
-    products = Product.query.all()
-    result = []
-    for product in products:
-        result.append({
-            'id': product.id,
-            'name': product.name,
-            'price': product.price,
-            'category_id': product.category_id
-        })
-    return jsonify(result)
+# @app.route('/products', methods=['GET'])
+# def get_products():
+#     products = Product.query.all()
+#     result = []
+#     for product in products:
+#         result.append({
+#             'id': product.id,
+#             'name': product.name,
+#             'price': product.price,
+#             'category_id': product.category_id
+#         })
+#     return jsonify(result)
 
 
 @app.route('/api/v1/books', methods=['POST'])  # @app.route('/bm/v1/books/<book_id>', methods=['GET'])

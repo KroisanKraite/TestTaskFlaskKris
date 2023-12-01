@@ -4,7 +4,7 @@ from sqlalchemy.orm import relationship
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy import create_engine
 
-engine = create_engine('postgresql://localhost:5432/postgres')
+engine = create_engine('postgresql://postgres:postgres@localhost/TestTaskDB')
 
 Base = declarative_base()
 

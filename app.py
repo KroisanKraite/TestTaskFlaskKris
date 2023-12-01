@@ -1,5 +1,6 @@
 from flask import Flask, request, jsonify
 from flask_cors import CORS
+from flask_sqlalchemy import SQLAlchemy
 from models import Product
 from dotenv import load_dotenv
 import os
@@ -22,7 +23,8 @@ class Config:
 
 
 config = Config()
-app.config['SQLALCHEMY_DATABASE_URI'] = 'jdbc:postgresql://localhost:5432/postgres'
+app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://postgres:postgres@localhost/TestTaskDB'
+db = SQLAlchemy(app)
 
 
 books = [
@@ -37,7 +39,8 @@ books = [
         "id": "2",
         "name": "Чистый код",
         "authors": ["Мартин Роберт"],
-        "description": "Плохой код может работать, но он будет мешать развитию проекта и компании-разработчика, требуя дополнительные ресурсы на поддержку и «укрощение». Каким же должен быть код?",
+        "description": "Плохой код может работать, но он будет мешать развитию проекта и компании-разработчика,"
+                       " требуя дополнительные ресурсы на поддержку и «укрощение». Каким же должен быть код?",
         "pages": 464
     },
     {
@@ -152,7 +155,7 @@ def get_book(book_id):
     }), 404
 
 
-@app.route('/api/v1/books/<book_id>', methods=['PATCH']) # @app.route('/bm/v1/books/<book_id>', methods=['PATCH'])
+@app.route('/api/v1/books/<book_id>', methods=['PATCH'])  # @app.route('/bm/v1/books/<book_id>', methods=['PATCH'])
 def update_book(book_id):
     data = request.json
 
